@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elevent — Confirmando cuenta</title>
+<style>
+  body {
+    font-family: -apple-system, sans-serif;
+    background: #08001A;
+    color: #E8E8FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    text-align: center;
+    padding: 24px;
+  }
+  .card {
+    background: rgba(191,0,255,0.1);
+    border: 1px solid rgba(191,0,255,0.3);
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 400px;
+  }
+  .star { font-size: 48px; margin-bottom: 16px; }
+  h1 { color: #BF00FF; font-size: 24px; margin-bottom: 12px; }
+  p { color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 24px; }
+  .btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #BF00FF, #00F5FF);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="star">✦</div>
+  <h1>¡Cuenta confirmada!</h1>
+  <p>Tu cuenta de Elevent está activa.<br>
+  Abre la app y inicia sesión con tu email y contraseña.</p>
+  <a href="elevent://" class="btn">ABRIR ELEVENT</a>
+  <p style="margin-top:20px; font-size:13px;">
+    Si el botón no funciona, abre la app manualmente.
+  </p>
+</div>
+
+<script>
+  // Intentar abrir la app automáticamente
+  setTimeout(() => {
+    window.location.href = 'elevent://'
+  }, 1500)
+</script>
+</body>
+</html>
