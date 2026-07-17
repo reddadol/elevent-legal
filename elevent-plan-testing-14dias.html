@@ -192,6 +192,18 @@
     padding: 13px; border-radius: 10px; cursor:pointer; letter-spacing:0.5px;
   }
   .gate-error { color: var(--pink); font-size: 13px; margin-top: 8px; display:none; }
+  .role-pick { display:flex; gap:8px; margin-bottom:16px; }
+  .role-pick-btn {
+    flex:1; background: var(--bg2); border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13.5px; padding: 10px; border-radius:10px;
+    cursor:pointer; transition: all .15s;
+  }
+  .role-pick-btn.active { border-color: var(--cyan); color: #fff; background: rgba(0,245,255,0.1); }
+  .role-badge {
+    display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px;
+    background: rgba(0,245,255,0.12); color: var(--cyan); border:1px solid rgba(0,245,255,0.35);
+    margin-left: 8px; vertical-align: middle;
+  }
 
   .whoami {
     display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -216,6 +228,11 @@
     <p>Ingresa el correo con el que te invitamos a la Prueba Cerrada — así guardamos tu progreso día a día y no se mezcla con el de otro tester.</p>
     <input type="text" id="gateName" placeholder="Tu nombre">
     <input type="email" id="gateEmail" placeholder="tu@correo.com">
+    <p style="margin-bottom:8px; font-size:13px; color:var(--text-muted)">¿Cómo vas a probar la app?</p>
+    <div class="role-pick" id="rolePick">
+      <button type="button" class="role-pick-btn active" data-role="asistente" onclick="pickRole('asistente')">Asistente</button>
+      <button type="button" class="role-pick-btn" data-role="organizador" onclick="pickRole('organizador')">Organizador</button>
+    </div>
     <button onclick="submitGate()">Empezar</button>
     <div class="gate-error" id="gateError">Ingresa un nombre y un correo válido.</div>
   </div>
@@ -243,10 +260,10 @@
   </header>
 
   <div class="whoami">
-    <div>Conectado como <b id="whoamiLabel">—</b></div>
+    <div>Conectado como <b id="whoamiLabel">—</b><span class="role-badge" id="roleBadge"></span></div>
     <div style="display:flex; align-items:center; gap:14px;">
       <span class="sync-status" id="syncStatus"></span>
-      <button onclick="switchTester()">No soy yo</button>
+      <button onclick="switchTester()">No soy yo / cambiar rol</button>
     </div>
   </div>
 
@@ -265,10 +282,6 @@
     <button class="reset-btn" onclick="resetProgress()">Reiniciar progreso</button>
   </div>
 
-  <div class="role-toggle">
-    <button id="btnGeneral" class="active" onclick="setRole(false)">Vista general</button>
-    <button id="btnOrg" onclick="setRole(true)">+ Tareas de organizador</button>
-  </div>
 
   <!-- DÍA 1 -->
   <div class="day" data-has-org="true">
@@ -529,15 +542,30 @@
   const SUPABASE_URL = 'https://fpjosrijcflbphbhufgw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_klgFTaQYqLevx9pkp2sUbA_53fmVe9g';
   const TABLE = 'testing_plan_progress';
+  const TESTERS_TABLE = 'testing_plan_testers';
 
-  const ALL_IDS = Array.from(document.querySelectorAll('.task input[type=checkbox]')).map(el => el.dataset.id);
   const TESTER_KEY = 'elevent_testing_plan_tester';
+  let pickedRole = 'asistente';
+
+  function pickRole(role) {
+    pickedRole = role;
+    document.querySelectorAll('.role-pick-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+  }
+
+  function visibleIds() {
+    const sel = pickedTesterRole() === 'organizador' ? '.task input[type=checkbox]' : '.task[data-role="general"] input[type=checkbox]';
+    return Array.from(document.querySelectorAll(sel)).map(el => el.dataset.id);
+  }
+  function pickedTesterRole() {
+    const t = getTester();
+    return t ? t.role : 'asistente';
+  }
 
   function getTester() {
     try { return JSON.parse(localStorage.getItem(TESTER_KEY)); } catch { return null; }
   }
-  function setTester(name, email) {
-    localStorage.setItem(TESTER_KEY, JSON.stringify({ name, email: email.trim().toLowerCase() }));
+  function setTester(name, email, role) {
+    localStorage.setItem(TESTER_KEY, JSON.stringify({ name, email: email.trim().toLowerCase(), role }));
   }
   function localCacheKey(email) { return 'elevent_testing_plan_cache_' + email; }
   function loadLocalCache(email) {
@@ -551,6 +579,19 @@
     const el = document.getElementById('syncStatus');
     el.className = 'sync-status' + (kind ? ' ' + kind : '');
     el.textContent = text || '';
+  }
+
+  async function upsertTesterProfile(name, email, role) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/${TESTERS_TABLE}?on_conflict=tester_email`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates',
+        },
+        body: JSON.stringify({ tester_email: email, name, role, updated_at: new Date().toISOString() }),
+      });
+    } catch (e) { /* no bloquea el uso local si falla */ }
   }
 
   async function fetchRemoteProgress(email) {
@@ -597,8 +638,9 @@
   }
 
   function updateProgress(state) {
-    const doneCount = ALL_IDS.filter(id => state[id]).length;
-    const total = ALL_IDS.length;
+    const ids = visibleIds();
+    const doneCount = ids.filter(id => state[id]).length;
+    const total = ids.length;
     const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
     document.getElementById('doneLabel').textContent = `${doneCount} de ${total} tareas completadas`;
@@ -608,8 +650,8 @@
     ring.style.strokeDashoffset = circumference - (circumference * pct / 100);
 
     document.querySelectorAll('.day').forEach(day => {
-      const boxes = day.querySelectorAll('input[type=checkbox]');
-      const dayDone = Array.from(boxes).filter(b => state[b.dataset.id]).length;
+      const boxes = Array.from(day.querySelectorAll('input[type=checkbox]')).filter(b => ids.includes(b.dataset.id));
+      const dayDone = boxes.filter(b => state[b.dataset.id]).length;
       const label = day.querySelector('[data-day-progress]');
       if (label) label.textContent = `${dayDone}/${boxes.length}`;
     });
@@ -661,11 +703,8 @@
     }
   }
 
-  function setRole(showOrg) {
-    document.body.classList.toggle('show-organizador', showOrg);
-    document.getElementById('btnGeneral').classList.toggle('active', !showOrg);
-    document.getElementById('btnOrg').classList.toggle('active', showOrg);
-    localStorage.setItem('elevent_testing_plan_role', showOrg ? 'org' : 'general');
+  function applyRoleVisibility(role) {
+    document.body.classList.toggle('show-organizador', role === 'organizador');
   }
 
   function switchTester() {
@@ -681,7 +720,8 @@
       document.getElementById('gateError').style.display = 'block';
       return;
     }
-    setTester(name, email);
+    setTester(name, email, pickedRole);
+    upsertTesterProfile(name, email.trim().toLowerCase(), pickedRole);
     boot();
   }
 
@@ -693,8 +733,9 @@
     }
     document.getElementById('gateOverlay').style.display = 'none';
     document.getElementById('whoamiLabel').textContent = `${tester.name} (${tester.email})`;
+    document.getElementById('roleBadge').textContent = tester.role === 'organizador' ? 'ORGANIZADOR' : 'ASISTENTE';
+    applyRoleVisibility(tester.role);
     initCheckboxes(tester.email);
-    setRole(localStorage.getItem('elevent_testing_plan_role') === 'org');
   }
 
   boot();

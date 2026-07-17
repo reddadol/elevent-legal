@@ -104,34 +104,57 @@
   const SUPABASE_URL = 'https://fpjosrijcflbphbhufgw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_klgFTaQYqLevx9pkp2sUbA_53fmVe9g';
   const TABLE = 'testing_plan_progress';
+  const TESTERS_TABLE = 'testing_plan_testers';
 
   // Total de tareas por día (debe calzar con elevent-plan-testing-14dias.html)
   const DAY_TOTALS = {1:5, 2:4, 3:5, 4:4, 5:4, 6:3, 7:3, 8:4, 9:4, 10:3, 11:4, 12:2, 13:2, 14:3};
-  const TOTAL_TASKS = Object.values(DAY_TOTALS).reduce((a,b)=>a+b, 0);
   const DAYS = Object.keys(DAY_TOTALS).map(Number).sort((a,b)=>a-b);
+
+  // IDs exactos de tareas solo-organizador — si alguien cambia de rol a mitad
+  // de camino, estas se excluyen del conteo de un asistente (aunque haya
+  // quedado marcada de cuando era organizador) para no inflar su progreso.
+  const ORG_ONLY_IDS = new Set(['d1-5','d3-5','d4-4','d5-4','d6-3','d8-4','d9-4','d11-3','d11-4']);
+
+  function dayTotalForRole(d, role) {
+    return role === 'organizador' ? DAY_TOTALS[d] : DAY_TOTALS[d] - countOrgOnlyInDay(d);
+  }
+  function countOrgOnlyInDay(d) {
+    let n = 0;
+    ORG_ONLY_IDS.forEach(id => { if (dayOf(id) === d) n++; });
+    return n;
+  }
+  function idsForRole(ids, role) {
+    return role === 'organizador' ? ids : ids.filter(id => !ORG_ONLY_IDS.has(id));
+  }
+  const TOTAL_ORGANIZADOR = DAYS.reduce((s,d) => s + dayTotalForRole(d,'organizador'), 0);
+  const TOTAL_ASISTENTE = DAYS.reduce((s,d) => s + dayTotalForRole(d,'asistente'), 0);
 
   function dayOf(taskId) {
     const m = taskId.match(/^d(\d+)-/);
     return m ? parseInt(m[1], 10) : null;
   }
-
   async function loadData() {
     document.getElementById('lastUpdated').textContent = 'Actualizando...';
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/${TABLE}?select=tester_email,task_id,done,updated_at&order=updated_at.desc`,
-        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-      );
-      if (!res.ok) throw new Error('fetch failed');
-      const rows = await res.json();
-      render(rows);
+      const [progRes, testersRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=tester_email,task_id,done,updated_at&order=updated_at.desc`,
+          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }),
+        fetch(`${SUPABASE_URL}/rest/v1/${TESTERS_TABLE}?select=tester_email,name,role`,
+          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }),
+      ]);
+      if (!progRes.ok || !testersRes.ok) throw new Error('fetch failed');
+      const rows = await progRes.json();
+      const testerRows = await testersRes.json();
+      const profiles = {};
+      testerRows.forEach(t => { profiles[t.tester_email] = t; });
+      render(rows, profiles);
       document.getElementById('lastUpdated').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL');
     } catch (e) {
       document.getElementById('lastUpdated').textContent = 'Error al cargar — reintenta';
     }
   }
 
-  function render(rows) {
+  function render(rows, profiles) {
     const byTester = {};
     rows.forEach(r => {
       if (!r.done) return;
@@ -139,24 +162,32 @@
       byTester[r.tester_email].tasks[r.task_id] = true;
       if (r.updated_at > byTester[r.tester_email].lastUpdate) byTester[r.tester_email].lastUpdate = r.updated_at;
     });
+    // Incluir también testers que ya se registraron pero aún no marcaron nada
+    Object.keys(profiles).forEach(email => {
+      if (!byTester[email]) byTester[email] = { tasks: {}, lastUpdate: null };
+    });
 
     const testers = Object.keys(byTester).sort();
     document.getElementById('emptyState').style.display = testers.length ? 'none' : 'block';
     document.getElementById('dataTable').style.display = testers.length ? 'table' : 'none';
 
+    const roleOf = email => (profiles[email] && profiles[email].role) || 'asistente';
+    const totalFor = email => roleOf(email) === 'organizador' ? TOTAL_ORGANIZADOR : TOTAL_ASISTENTE;
+    const doneIdsFor = email => idsForRole(Object.keys(byTester[email].tasks), roleOf(email));
+
     // Stats
     const totalDone = rows.filter(r => r.done).length;
     const avgPct = testers.length
-      ? Math.round(testers.reduce((sum, email) => sum + Object.keys(byTester[email].tasks).length, 0) / testers.length / TOTAL_TASKS * 100)
+      ? Math.round(testers.reduce((sum, email) => sum + doneIdsFor(email).length / totalFor(email), 0) / testers.length * 100)
       : 0;
     document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="num">${testers.length}</div><div class="label">TESTERS ACTIVOS</div></div>
+      <div class="stat-card"><div class="num">${testers.length}</div><div class="label">TESTERS REGISTRADOS</div></div>
       <div class="stat-card"><div class="num">${totalDone}</div><div class="label">TAREAS COMPLETADAS (TOTAL)</div></div>
       <div class="stat-card"><div class="num">${avgPct}%</div><div class="label">PROGRESO PROMEDIO</div></div>
     `;
 
     // Head
-    let headHtml = '<th class="tester-col">Tester</th>';
+    let headHtml = '<th class="tester-col">Tester</th><th>Rol</th>';
     DAYS.forEach(d => { headHtml += `<th>D${d}</th>`; });
     headHtml += '<th>Total</th>';
     document.getElementById('headRow').innerHTML = headHtml;
@@ -164,19 +195,21 @@
     // Body
     let bodyHtml = '';
     testers.forEach(email => {
-      const t = byTester[email];
-      const doneIds = Object.keys(t.tasks);
-      const totalDoneForTester = doneIds.length;
-      const pct = Math.round(totalDoneForTester / TOTAL_TASKS * 100);
+      const role = roleOf(email);
+      const name = (profiles[email] && profiles[email].name) || email.split('@')[0];
+      const doneIds = doneIdsFor(email);
+      const total = totalFor(email);
+      const pct = total ? Math.round(doneIds.length / total * 100) : 0;
 
-      bodyHtml += `<tr><td class="tester-name">${escapeHtml(email.split('@')[0])}<div class="tester-email">${escapeHtml(email)}</div></td>`;
+      bodyHtml += `<tr><td class="tester-name">${escapeHtml(name)}<div class="tester-email">${escapeHtml(email)}</div></td>`;
+      bodyHtml += `<td style="text-transform:capitalize; color: var(--text-muted)">${escapeHtml(role)}</td>`;
       DAYS.forEach(d => {
         const doneForDay = doneIds.filter(id => dayOf(id) === d).length;
-        const total = DAY_TOTALS[d];
+        const dayTotal = dayTotalForRole(d, role);
         let cls = 'none';
-        if (doneForDay >= total && total > 0) cls = 'full';
+        if (doneForDay >= dayTotal && dayTotal > 0) cls = 'full';
         else if (doneForDay > 0) cls = 'partial';
-        bodyHtml += `<td><span class="day-cell ${cls}">${doneForDay}/${total}</span></td>`;
+        bodyHtml += `<td><span class="day-cell ${cls}">${doneForDay}/${dayTotal}</span></td>`;
       });
       bodyHtml += `<td class="pct-cell" style="color:${pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--pink)'}">${pct}%</td></tr>`;
     });
