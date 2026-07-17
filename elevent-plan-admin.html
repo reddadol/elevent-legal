@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elevent — Progreso de Testers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg: #0A0A0F; --bg2: #0F0F18; --card: #13131F; --card-border: rgba(191,0,255,0.22);
+    --purple: #BF00FF; --cyan: #00F5FF; --pink: #FF2E9B; --green: #2CE896; --yellow: #FFC940;
+    --text: #E8E8FF; --text-muted: rgba(232,232,255,0.62); --text-faint: rgba(232,232,255,0.38);
+  }
+  body {
+    background: radial-gradient(ellipse at top, #150826 0%, var(--bg) 55%);
+    color: var(--text); font-family:'Rajdhani',-apple-system,BlinkMacSystemFont,sans-serif;
+    min-height:100vh; line-height:1.5;
+  }
+  .wrap { max-width: 1180px; margin:0 auto; padding: 40px 24px 80px; }
+  .logo-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .logo-mark { font-size:20px; color:var(--cyan); }
+  .logo-text { font-family:'Orbitron',sans-serif; font-weight:900; font-size:13px; letter-spacing:4px;
+    background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h1 { font-family:'Orbitron',sans-serif; font-weight:900; font-size: clamp(22px,4vw,30px); color:#fff; margin-bottom:10px; }
+  .subtitle { color: var(--text-muted); font-size:14.5px; max-width:70ch; margin-bottom: 20px; }
+
+  .stats-row { display:flex; gap:14px; flex-wrap:wrap; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border:1px solid var(--card-border); border-radius:14px; padding:16px 20px; min-width:140px; }
+  .stat-card .num { font-family:'Orbitron',sans-serif; font-weight:900; font-size:24px; color:var(--cyan); }
+  .stat-card .label { font-size:12px; color:var(--text-faint); margin-top:4px; letter-spacing:0.3px; }
+
+  .toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .refresh-btn {
+    background: var(--card); border:1px solid var(--card-border); color:var(--text);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; padding: 9px 16px;
+    border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+  .refresh-btn:hover { border-color: var(--cyan); }
+  .last-updated { font-size:12px; color: var(--text-faint); }
+
+  .table-scroll { overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.08); }
+  table { border-collapse: collapse; width:100%; min-width: 900px; background: var(--card); }
+  th, td { padding: 10px 10px; text-align:center; font-size:12.5px; border-bottom:1px solid rgba(255,255,255,0.05); }
+  thead th {
+    background: var(--bg2); font-family:'Rajdhani',sans-serif; font-weight:700; color: var(--text-faint);
+    letter-spacing:0.3px; font-size:11px; text-transform:uppercase; position: sticky; top:0;
+  }
+  td.tester-name { text-align:left; font-weight:700; color:#fff; white-space:nowrap; padding-left:16px; }
+  td.tester-email { text-align:left; font-size:11px; color: var(--text-faint); white-space:nowrap; }
+  th.tester-col { text-align:left; padding-left:16px; }
+  td.pct-cell { font-family:'Orbitron',sans-serif; font-weight:700; }
+
+  .day-cell {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 34px; height: 26px; border-radius: 7px; font-weight:700; font-size:11px;
+  }
+  .day-cell.full { background: rgba(44,232,150,0.18); color: var(--green); border:1px solid rgba(44,232,150,0.4); }
+  .day-cell.partial { background: rgba(255,201,64,0.15); color: var(--yellow); border:1px solid rgba(255,201,64,0.35); }
+  .day-cell.none { background: rgba(255,255,255,0.03); color: var(--text-faint); border:1px solid rgba(255,255,255,0.06); }
+
+  .empty-state { text-align:center; padding: 60px 20px; color: var(--text-faint); }
+  .empty-state .big { font-size:16px; color: var(--text-muted); margin-bottom:6px; }
+
+  footer { text-align:center; margin-top:30px; color:var(--text-faint); font-size:12px; }
+
+  @media (max-width: 700px) {
+    .wrap { padding: 28px 14px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-row"><span class="logo-mark">✦</span><span class="logo-text">ELEVENT</span></div>
+  <h1>Progreso de la Prueba Cerrada</h1>
+  <p class="subtitle">Vista en vivo de los 14 días de testing. Cada celda muestra cuántas tareas completó ese tester ese día — verde = día completo, amarillo = parcial, gris = nada aún.</p>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="toolbar">
+    <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
+    <span class="last-updated" id="lastUpdated"></span>
+  </div>
+
+  <div class="table-scroll">
+    <table id="dataTable">
+      <thead>
+        <tr id="headRow"></tr>
+      </thead>
+      <tbody id="bodyRows"></tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="big">Todavía no hay actividad registrada.</div>
+    <div>Apenas un tester marque su primera tarea en el plan de 14 días, va a aparecer acá.</div>
+  </div>
+
+  <footer>Elevent — Panel interno, no compartir el link públicamente · Auto-actualiza cada 30s</footer>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://fpjosrijcflbphbhufgw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_klgFTaQYqLevx9pkp2sUbA_53fmVe9g';
+  const TABLE = 'testing_plan_progress';
+
+  // Total de tareas por día (debe calzar con elevent-plan-testing-14dias.html)
+  const DAY_TOTALS = {1:5, 2:4, 3:5, 4:4, 5:4, 6:3, 7:3, 8:4, 9:4, 10:3, 11:4, 12:2, 13:2, 14:3};
+  const TOTAL_TASKS = Object.values(DAY_TOTALS).reduce((a,b)=>a+b, 0);
+  const DAYS = Object.keys(DAY_TOTALS).map(Number).sort((a,b)=>a-b);
+
+  function dayOf(taskId) {
+    const m = taskId.match(/^d(\d+)-/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  async function loadData() {
+    document.getElementById('lastUpdated').textContent = 'Actualizando...';
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?select=tester_email,task_id,done,updated_at&order=updated_at.desc`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (!res.ok) throw new Error('fetch failed');
+      const rows = await res.json();
+      render(rows);
+      document.getElementById('lastUpdated').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL');
+    } catch (e) {
+      document.getElementById('lastUpdated').textContent = 'Error al cargar — reintenta';
+    }
+  }
+
+  function render(rows) {
+    const byTester = {};
+    rows.forEach(r => {
+      if (!r.done) return;
+      if (!byTester[r.tester_email]) byTester[r.tester_email] = { tasks: {}, lastUpdate: r.updated_at };
+      byTester[r.tester_email].tasks[r.task_id] = true;
+      if (r.updated_at > byTester[r.tester_email].lastUpdate) byTester[r.tester_email].lastUpdate = r.updated_at;
+    });
+
+    const testers = Object.keys(byTester).sort();
+    document.getElementById('emptyState').style.display = testers.length ? 'none' : 'block';
+    document.getElementById('dataTable').style.display = testers.length ? 'table' : 'none';
+
+    // Stats
+    const totalDone = rows.filter(r => r.done).length;
+    const avgPct = testers.length
+      ? Math.round(testers.reduce((sum, email) => sum + Object.keys(byTester[email].tasks).length, 0) / testers.length / TOTAL_TASKS * 100)
+      : 0;
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="num">${testers.length}</div><div class="label">TESTERS ACTIVOS</div></div>
+      <div class="stat-card"><div class="num">${totalDone}</div><div class="label">TAREAS COMPLETADAS (TOTAL)</div></div>
+      <div class="stat-card"><div class="num">${avgPct}%</div><div class="label">PROGRESO PROMEDIO</div></div>
+    `;
+
+    // Head
+    let headHtml = '<th class="tester-col">Tester</th>';
+    DAYS.forEach(d => { headHtml += `<th>D${d}</th>`; });
+    headHtml += '<th>Total</th>';
+    document.getElementById('headRow').innerHTML = headHtml;
+
+    // Body
+    let bodyHtml = '';
+    testers.forEach(email => {
+      const t = byTester[email];
+      const doneIds = Object.keys(t.tasks);
+      const totalDoneForTester = doneIds.length;
+      const pct = Math.round(totalDoneForTester / TOTAL_TASKS * 100);
+
+      bodyHtml += `<tr><td class="tester-name">${escapeHtml(email.split('@')[0])}<div class="tester-email">${escapeHtml(email)}</div></td>`;
+      DAYS.forEach(d => {
+        const doneForDay = doneIds.filter(id => dayOf(id) === d).length;
+        const total = DAY_TOTALS[d];
+        let cls = 'none';
+        if (doneForDay >= total && total > 0) cls = 'full';
+        else if (doneForDay > 0) cls = 'partial';
+        bodyHtml += `<td><span class="day-cell ${cls}">${doneForDay}/${total}</span></td>`;
+      });
+      bodyHtml += `<td class="pct-cell" style="color:${pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--pink)'}">${pct}%</td></tr>`;
+    });
+    document.getElementById('bodyRows').innerHTML = bodyHtml;
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  loadData();
+  setInterval(loadData, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elevent — Plan de Prueba Cerrada (14 días)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg: #0A0A0F;
+    --bg2: #0F0F18;
+    --card: #13131F;
+    --card-border: rgba(191,0,255,0.22);
+    --purple: #BF00FF;
+    --cyan: #00F5FF;
+    --pink: #FF2E9B;
+    --text: #E8E8FF;
+    --text-muted: rgba(232,232,255,0.62);
+    --text-faint: rgba(232,232,255,0.38);
+    --green: #2CE896;
+  }
+  body {
+    background: radial-gradient(ellipse at top, #150826 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 100px; }
+
+  /* Header */
+  header { margin-bottom: 36px; }
+  .logo-row { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .logo-mark { font-size: 22px; color: var(--cyan); }
+  .logo-text {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 15px;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, var(--purple), var(--cyan));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: clamp(26px, 4.5vw, 38px); letter-spacing: 0.5px;
+    text-wrap: balance; margin-bottom: 12px; color: #fff;
+  }
+  .subtitle { color: var(--text-muted); font-size: 16px; max-width: 60ch; margin-bottom: 22px; }
+  .meta-row { display:flex; flex-wrap:wrap; gap: 10px; }
+  .pill {
+    display:inline-flex; align-items:center; gap:6px;
+    border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--text-muted);
+    font-weight: 600;
+  }
+  .pill b { color: var(--text); }
+
+  /* Progress */
+  .progress-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 18px;
+    padding: 20px 24px; margin: 28px 0 34px; display:flex; align-items:center; gap:20px;
+    flex-wrap: wrap;
+  }
+  .progress-ring-wrap { position:relative; width:64px; height:64px; flex-shrink:0; }
+  .progress-ring-wrap svg { transform: rotate(-90deg); }
+  .progress-ring-bg { fill:none; stroke: rgba(255,255,255,0.08); stroke-width:6; }
+  .progress-ring-fg { fill:none; stroke: var(--cyan); stroke-width:6; stroke-linecap:round; transition: stroke-dashoffset .4s ease; }
+  .progress-pct {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; color:var(--cyan);
+  }
+  .progress-text { flex:1; min-width:200px; }
+  .progress-text .big { font-weight:700; font-size:16px; color:#fff; }
+  .progress-text .small { font-size:13px; color:var(--text-faint); margin-top:2px; }
+  .reset-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);
+    border-radius: 10px; padding: 9px 16px; font-family:'Rajdhani',sans-serif; font-weight:600;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  .reset-btn:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* Role toggle */
+  .role-toggle {
+    display:inline-flex; background: var(--card); border:1px solid var(--card-border);
+    border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 34px;
+  }
+  .role-toggle button {
+    background: transparent; border: none; color: var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size: 13px; letter-spacing:0.5px;
+    padding: 9px 18px; border-radius: 8px; cursor: pointer; transition: all .15s;
+  }
+  .role-toggle button.active {
+    background: linear-gradient(90deg, var(--purple), #7700CC);
+    color: #fff;
+  }
+
+  /* Day sections */
+  .day {
+    border: 1px solid rgba(255,255,255,0.07); border-radius: 20px;
+    background: linear-gradient(180deg, var(--card) 0%, var(--bg2) 100%);
+    margin-bottom: 22px; overflow: hidden;
+  }
+  .day-head {
+    display:flex; align-items:center; gap:16px; padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .day-num {
+    font-family:'Orbitron',sans-serif; font-weight:900; font-size:20px;
+    color: var(--bg); background: linear-gradient(135deg, var(--cyan), var(--purple));
+    width: 46px; height:46px; border-radius: 12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .day-titles { flex:1; min-width:0; }
+  .day-eyebrow { font-size:11px; letter-spacing:2px; color: var(--cyan); font-weight:700; text-transform:uppercase; }
+  .day-title { font-size: 18px; font-weight:700; color:#fff; margin-top:2px; }
+  .day-progress { font-family:'Rajdhani',sans-serif; font-size:13px; color: var(--text-faint); font-weight:600; flex-shrink:0; }
+
+  .task-list { padding: 6px 12px 16px; }
+  .task {
+    display:flex; align-items:flex-start; gap:12px;
+    padding: 12px 12px; border-radius: 12px; cursor:pointer;
+    transition: background .15s;
+  }
+  .task:hover { background: rgba(255,255,255,0.03); }
+  .task input[type=checkbox] { display:none; }
+  .checkbox {
+    width: 22px; height:22px; border-radius: 7px; flex-shrink:0; margin-top:1px;
+    border: 2px solid rgba(255,255,255,0.22); display:flex; align-items:center; justify-content:center;
+    transition: all .15s;
+  }
+  .task input:checked + .checkbox {
+    background: linear-gradient(135deg, var(--cyan), var(--green));
+    border-color: transparent;
+  }
+  .checkbox svg { width:13px; height:13px; opacity:0; transition: opacity .1s; }
+  .task input:checked + .checkbox svg { opacity:1; }
+  .task-body { flex:1; }
+  .task-text { font-size: 15px; color: var(--text); font-weight:500; }
+  .task input:checked ~ .task-body .task-text { color: var(--text-faint); text-decoration: line-through; text-decoration-color: rgba(232,232,255,0.25); }
+  .task-hint { font-size: 12.5px; color: var(--text-faint); margin-top:2px; }
+  .tag {
+    display:inline-block; font-size:10px; font-weight:800; letter-spacing:0.5px;
+    padding: 2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;
+    background: rgba(255,46,155,0.15); color: var(--pink); border: 1px solid rgba(255,46,155,0.35);
+  }
+  .task[data-role="organizador"] { display: none; }
+  body.show-organizador .task[data-role="organizador"] { display: flex; }
+  body.show-organizador .day[data-has-org="true"] .day-eyebrow::after { content: " · incluye tareas de organizador"; color: var(--pink); }
+
+  /* Footer / report block */
+  .report-card {
+    margin-top: 40px; background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 18px; padding: 26px 28px;
+  }
+  .report-card h2 { font-family:'Orbitron',sans-serif; font-size:15px; color: var(--cyan); letter-spacing:1px; margin-bottom:10px; }
+  .report-card p { color: var(--text-muted); font-size: 14.5px; margin-bottom: 8px; }
+  .report-card a { color: var(--cyan); font-weight:600; }
+
+  footer { text-align:center; margin-top: 40px; color: var(--text-faint); font-size:12.5px; }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 32px 16px 80px; }
+    .day-head { padding: 16px 16px; gap:12px; }
+    .day-num { width:38px; height:38px; font-size:16px; }
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+  }
+
+  /* Gate modal */
+  .gate-overlay {
+    position: fixed; inset: 0; background: rgba(5,3,12,0.88); backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center; z-index: 999; padding: 20px;
+  }
+  .gate-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 20px;
+    padding: 32px 28px; max-width: 380px; width:100%;
+  }
+  .gate-card .logo-mark { font-size: 26px; color: var(--cyan); display:block; margin-bottom: 10px; }
+  .gate-card h2 { font-family:'Orbitron',sans-serif; font-size: 18px; color:#fff; margin-bottom:8px; }
+  .gate-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+  .gate-card input {
+    width:100%; background: var(--bg2); border: 1px solid rgba(255,255,255,0.12); color: var(--text);
+    border-radius: 10px; padding: 12px 14px; font-family:'Rajdhani',sans-serif; font-size:15px;
+    margin-bottom: 12px; outline: none;
+  }
+  .gate-card input:focus { border-color: var(--cyan); }
+  .gate-card button {
+    width:100%; background: linear-gradient(90deg, var(--purple), var(--cyan)); border:none;
+    color: #08001A; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:15px;
+    padding: 13px; border-radius: 10px; cursor:pointer; letter-spacing:0.5px;
+  }
+  .gate-error { color: var(--pink); font-size: 13px; margin-top: 8px; display:none; }
+
+  .whoami {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-bottom: 18px; font-size: 13px; color: var(--text-faint);
+  }
+  .whoami b { color: var(--text); }
+  .whoami button {
+    background:none; border:none; color: var(--cyan); font-family:'Rajdhani',sans-serif;
+    font-weight:600; font-size:13px; cursor:pointer; text-decoration:underline;
+  }
+  .sync-status { font-size:11px; color: var(--text-faint); }
+  .sync-status.syncing { color: var(--cyan); }
+  .sync-status.error { color: var(--pink); }
+</style>
+</head>
+<body>
+
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <span class="logo-mark">✦</span>
+    <h2>Antes de empezar</h2>
+    <p>Ingresa el correo con el que te invitamos a la Prueba Cerrada — así guardamos tu progreso día a día y no se mezcla con el de otro tester.</p>
+    <input type="text" id="gateName" placeholder="Tu nombre">
+    <input type="email" id="gateEmail" placeholder="tu@correo.com">
+    <button onclick="submitGate()">Empezar</button>
+    <div class="gate-error" id="gateError">Ingresa un nombre y un correo válido.</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="logo-row">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">ELEVENT</span>
+    </div>
+    <h1>Plan de Prueba Cerrada — 14 días</h1>
+    <p class="subtitle">
+      Guía día a día para los 15 testers de la Prueba Cerrada en Google Play. Marca cada tarea a
+      medida que la completas — tu progreso se guarda solo en este dispositivo. Si algo falla,
+      se ve raro, o la app se cierra sola, avisa a <a href="mailto:hola@elevent.cl" style="color:var(--cyan)">hola@elevent.cl</a>
+      con una captura si puedes.
+    </p>
+    <div class="meta-row">
+      <span class="pill">📅 <b>14 días</b> de duración</span>
+      <span class="pill">👥 <b>15</b> testers</span>
+      <span class="pill">🎯 <b>4</b> organizadores · <b>11</b> asistentes</span>
+    </div>
+  </header>
+
+  <div class="whoami">
+    <div>Conectado como <b id="whoamiLabel">—</b></div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <span class="sync-status" id="syncStatus"></span>
+      <button onclick="switchTester()">No soy yo</button>
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-ring-wrap">
+      <svg width="64" height="64">
+        <circle class="progress-ring-bg" cx="32" cy="32" r="27"></circle>
+        <circle id="ringFg" class="progress-ring-fg" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"></circle>
+      </svg>
+      <div class="progress-pct" id="pctLabel">0%</div>
+    </div>
+    <div class="progress-text">
+      <div class="big" id="doneLabel">0 de 0 tareas completadas</div>
+      <div class="small">Tu avance se guarda en la nube — puedes cambiar de dispositivo sin perderlo.</div>
+    </div>
+    <button class="reset-btn" onclick="resetProgress()">Reiniciar progreso</button>
+  </div>
+
+  <div class="role-toggle">
+    <button id="btnGeneral" class="active" onclick="setRole(false)">Vista general</button>
+    <button id="btnOrg" onclick="setRole(true)">+ Tareas de organizador</button>
+  </div>
+
+  <!-- DÍA 1 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">1</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Arranque</div>
+        <div class="day-title">Instalación y primer login</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d1-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Aceptar la invitación de Prueba Cerrada e instalar Elevent desde Play Store</div><div class="task-hint">Revisa el link que te llegó por correo o WhatsApp</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d1-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Crear cuenta con correo/contraseña <b>o</b> iniciar sesión con Google</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d1-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Completar el onboarding (rol, categorías de interés)</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d1-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Recorrer el feed principal y ver 3 historias distintas</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d1-5"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Crear tu organización <span class="tag">ORGANIZADOR</span></div><div class="task-hint">Perfil → Crear organización</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 2 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">2</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Arranque</div>
+        <div class="day-title">Explorar y sesión</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d2-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Usar la pestaña Explorar — probar los tabs Eventos / Organizadores / Personas</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d2-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Abrir el detalle de 3 eventos distintos y probar las 4 posiciones del panel (deslizar)</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d2-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Forzar el cierre de la app (deslizar desde recientes) y reabrirla</div><div class="task-hint">Debe entrar directo sin pedir login de nuevo</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d2-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Cambiar entre los 3 temas de color en Settings (Cyberpunk / Sobrio / Claro)</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 3 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">3</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Social</div>
+        <div class="day-title">Seguir y marcar asistencia</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d3-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Seguir a 2 organizadores y a 1 usuario (pestaña Personas)</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d3-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Marcar VOY en 1 evento e INTERESA en otro</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d3-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Guardar (bookmark) un evento y confirmar que aparece en tu Agenda</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d3-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar tu propio perfil público y activar/desactivar "Historial privado"</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d3-5"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Crear tu primer evento, con foto de portada <span class="tag">ORGANIZADOR</span></div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 4 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">4</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Social</div>
+        <div class="day-title">Perfil y notificaciones</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d4-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar que te haya llegado alguna notificación (🔔) por seguir a alguien</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d4-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Dejar de seguir a alguien y confirmar que el contador baja</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d4-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Editar tu perfil (foto, categorías, bio)</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d4-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Editar tu evento — cambiar fecha o link de entradas <span class="tag">ORGANIZADOR</span></div><div class="task-hint">Gestionar Evento → campos de fecha y ticket_url</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 5 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">5</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Contenido</div>
+        <div class="day-title">Subir tu primer momento</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d5-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Subir un momento (foto o video) a un evento marcado como EN VIVO</div><div class="task-hint">Probará el chequeo de ubicación GPS</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d5-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Probar el editor: un filtro de color + texto sobre la imagen</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d5-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Agregar música de fondo a tu momento y confirmar que suena en el visor</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d5-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Subir un momento fase <b>ANTES</b> a tu evento <span class="tag">ORGANIZADOR</span></div><div class="task-hint">Confirma que los asistentes NO ven esta opción habilitada</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 6 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">6</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Contenido</div>
+        <div class="day-title">Probar el límite de momentos</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d6-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Subir momentos hasta llegar a 8 en el mismo evento y confirmar que el 9° se bloquea</div><div class="task-hint">Debe mostrar un mensaje claro, no un error genérico</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d6-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Darle like a 3 momentos de otras personas</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d6-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Subir 31 momentos a tu evento y confirmar que el #31 se bloquea <span class="tag">ORGANIZADOR</span></div><div class="task-hint">Tu límite es 30, más alto que el de un asistente</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 7 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">7</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 1 · Cierre</div>
+        <div class="day-title">Mensajes y primer feedback</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d7-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Mandar un mensaje a otro tester y confirmar que llega en pocos segundos</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d7-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Responder un mensaje que te hayan enviado</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d7-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text"><b>Checkpoint semana 1:</b> mandar tu primer feedback a hola@elevent.cl — qué te gustó, qué se sintió raro</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 8 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">8</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Seguridad</div>
+        <div class="day-title">Cuenta y sesión</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d8-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Cambiar tu contraseña desde Settings</div><div class="task-hint">Debe cerrar tu sesión automáticamente después</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d8-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Iniciar sesión de nuevo con la contraseña nueva</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d8-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar Settings → Sesiones activas</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d8-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Enviar una notificación a tus asistentes desde Gestionar Evento <span class="tag">ORGANIZADOR</span></div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 9 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">9</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Casos límite</div>
+        <div class="day-title">Cosas que deberían fallar</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d9-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Intentar calificar un evento al que NO fuiste y confirmar que no te deja</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d9-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Intentar calificar un evento que todavía no pasa y confirmar que no te deja</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d9-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Reportar un momento o evento de prueba usando "Reportar contenido"</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d9-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Intentar calificar tu propio evento y confirmar el bloqueo <span class="tag">ORGANIZADOR</span></div><div class="task-hint">Debe mostrar "No puedes calificar tu propio evento"</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 10 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">10</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Casos límite</div>
+        <div class="day-title">Condiciones difíciles</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d10-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Abrir la app con WiFi apagado y datos móviles apagados — revisar que no se rompa</div><div class="task-hint">Debe mostrar el aviso de sin conexión</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d10-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Probar el login con muy mala señal (ej. bajando a subterráneo)</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d10-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Abrir un evento, salir a otra app, y volver — confirmar que no perdiste tu lugar</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 11 -->
+  <div class="day" data-has-org="true">
+    <div class="day-head">
+      <div class="day-num">11</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Profundizar</div>
+        <div class="day-title">Explorar todo lo demás</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d11-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Usar "Busca tu Rumbo" (eventos cercanos por GPS)</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d11-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar tu Agenda completa (eventos VOY + INTERESA + guardados)</div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d11-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar tus Métricas de organizador (vistas, VOY/INTERESA, funnel) <span class="tag">ORGANIZADOR</span></div></div></label>
+      <label class="task" data-role="organizador"><input type="checkbox" data-id="d11-4"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisar la pantalla de "subir de nivel" — confirmar que dice "Pagos próximamente" y no cobra nada <span class="tag">ORGANIZADOR</span></div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 12 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">12</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Profundizar</div>
+        <div class="day-title">Uso natural, sin guion</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d12-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Usa la app como lo harías normalmente, sin seguir una lista — 10-15 minutos libres</div><div class="task-hint">Esto suele encontrar bugs que el checklist no cubre</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d12-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Anota cualquier cosa que te haya parecido lenta, confusa, o poco clara</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 13 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">13</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Cierre</div>
+        <div class="day-title">Repasar lo pendiente</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d13-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Revisa esta página completa y marca cualquier tarea que hayas dejado sin hacer</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d13-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Si algo falló antes y no lo reportaste, repítelo y reporta con captura</div></div></label>
+    </div>
+  </div>
+
+  <!-- DÍA 14 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num">14</div>
+      <div class="day-titles">
+        <div class="day-eyebrow">Semana 2 · Cierre</div>
+        <div class="day-title">Reporte final</div>
+      </div>
+      <div class="day-progress" data-day-progress></div>
+    </div>
+    <div class="task-list">
+      <label class="task" data-role="general"><input type="checkbox" data-id="d14-1"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Enviar tu reporte final a hola@elevent.cl: bugs encontrados, qué te gustó, qué mejorarías</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d14-2"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">Calificar tu experiencia general con Elevent del 1 al 10 en el mismo correo</div></div></label>
+      <label class="task" data-role="general"><input type="checkbox" data-id="d14-3"><span class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#08001A" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><div class="task-body"><div class="task-text">¡Gracias por probar Elevent! 🎉</div></div></label>
+    </div>
+  </div>
+
+  <div class="report-card">
+    <h2>¿ALGO FALLÓ?</h2>
+    <p>No esperes al día 14 si encuentras algo roto — repórtalo apenas pase, con la mayor cantidad de detalle posible (qué estabas haciendo, qué esperabas que pasara, qué pasó en realidad, y una captura si puedes).</p>
+    <p>📧 <a href="mailto:hola@elevent.cl">hola@elevent.cl</a></p>
+  </div>
+
+  <footer>Elevent — Prueba Cerrada · Julio 2026</footer>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://fpjosrijcflbphbhufgw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_klgFTaQYqLevx9pkp2sUbA_53fmVe9g';
+  const TABLE = 'testing_plan_progress';
+
+  const ALL_IDS = Array.from(document.querySelectorAll('.task input[type=checkbox]')).map(el => el.dataset.id);
+  const TESTER_KEY = 'elevent_testing_plan_tester';
+
+  function getTester() {
+    try { return JSON.parse(localStorage.getItem(TESTER_KEY)); } catch { return null; }
+  }
+  function setTester(name, email) {
+    localStorage.setItem(TESTER_KEY, JSON.stringify({ name, email: email.trim().toLowerCase() }));
+  }
+  function localCacheKey(email) { return 'elevent_testing_plan_cache_' + email; }
+  function loadLocalCache(email) {
+    try { return JSON.parse(localStorage.getItem(localCacheKey(email))) || {}; } catch { return {}; }
+  }
+  function saveLocalCache(email, state) {
+    localStorage.setItem(localCacheKey(email), JSON.stringify(state));
+  }
+
+  function setSyncStatus(kind, text) {
+    const el = document.getElementById('syncStatus');
+    el.className = 'sync-status' + (kind ? ' ' + kind : '');
+    el.textContent = text || '';
+  }
+
+  async function fetchRemoteProgress(email) {
+    setSyncStatus('syncing', 'Cargando tu progreso...');
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?tester_email=eq.${encodeURIComponent(email)}&select=task_id,done`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (!res.ok) throw new Error('fetch failed');
+      const rows = await res.json();
+      const state = {};
+      rows.forEach(r => { state[r.task_id] = r.done; });
+      setSyncStatus('', '');
+      return state;
+    } catch (e) {
+      setSyncStatus('error', 'Sin conexión — usando copia local');
+      return null;
+    }
+  }
+
+  async function upsertRemote(email, taskId, done) {
+    setSyncStatus('syncing', 'Guardando...');
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?on_conflict=tester_email,task_id`,
+        {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({ tester_email: email, task_id: taskId, done, updated_at: new Date().toISOString() }),
+        }
+      );
+      if (!res.ok) throw new Error('upsert failed');
+      setSyncStatus('', 'Guardado ✓');
+      setTimeout(() => setSyncStatus('', ''), 1500);
+    } catch (e) {
+      setSyncStatus('error', 'No se pudo guardar — reintenta');
+    }
+  }
+
+  function updateProgress(state) {
+    const doneCount = ALL_IDS.filter(id => state[id]).length;
+    const total = ALL_IDS.length;
+    const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+    document.getElementById('doneLabel').textContent = `${doneCount} de ${total} tareas completadas`;
+    document.getElementById('pctLabel').textContent = pct + '%';
+    const ring = document.getElementById('ringFg');
+    const circumference = 169.6;
+    ring.style.strokeDashoffset = circumference - (circumference * pct / 100);
+
+    document.querySelectorAll('.day').forEach(day => {
+      const boxes = day.querySelectorAll('input[type=checkbox]');
+      const dayDone = Array.from(boxes).filter(b => state[b.dataset.id]).length;
+      const label = day.querySelector('[data-day-progress]');
+      if (label) label.textContent = `${dayDone}/${boxes.length}`;
+    });
+  }
+
+  async function initCheckboxes(email) {
+    let state = loadLocalCache(email);
+    document.querySelectorAll('.task input[type=checkbox]').forEach(cb => {
+      cb.checked = !!state[cb.dataset.id];
+    });
+    updateProgress(state);
+
+    const remote = await fetchRemoteProgress(email);
+    if (remote) {
+      state = remote;
+      saveLocalCache(email, state);
+      document.querySelectorAll('.task input[type=checkbox]').forEach(cb => {
+        cb.checked = !!state[cb.dataset.id];
+      });
+      updateProgress(state);
+    }
+
+    document.querySelectorAll('.task input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        state[cb.dataset.id] = cb.checked;
+        saveLocalCache(email, state);
+        updateProgress(state);
+        upsertRemote(email, cb.dataset.id, cb.checked);
+      });
+    });
+  }
+
+  async function resetProgress() {
+    const tester = getTester();
+    if (!tester) return;
+    if (!confirm('¿Reiniciar todo tu progreso? Esto también lo borra de la nube.')) return;
+    localStorage.removeItem(localCacheKey(tester.email));
+    document.querySelectorAll('.task input[type=checkbox]').forEach(cb => cb.checked = false);
+    updateProgress({});
+    setSyncStatus('syncing', 'Reiniciando...');
+    try {
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/${TABLE}?tester_email=eq.${encodeURIComponent(tester.email)}`,
+        { method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      setSyncStatus('', '');
+    } catch (e) {
+      setSyncStatus('error', 'No se pudo limpiar en la nube');
+    }
+  }
+
+  function setRole(showOrg) {
+    document.body.classList.toggle('show-organizador', showOrg);
+    document.getElementById('btnGeneral').classList.toggle('active', !showOrg);
+    document.getElementById('btnOrg').classList.toggle('active', showOrg);
+    localStorage.setItem('elevent_testing_plan_role', showOrg ? 'org' : 'general');
+  }
+
+  function switchTester() {
+    localStorage.removeItem(TESTER_KEY);
+    location.reload();
+  }
+
+  function submitGate() {
+    const name = document.getElementById('gateName').value.trim();
+    const email = document.getElementById('gateEmail').value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!name || !emailOk) {
+      document.getElementById('gateError').style.display = 'block';
+      return;
+    }
+    setTester(name, email);
+    boot();
+  }
+
+  function boot() {
+    const tester = getTester();
+    if (!tester) {
+      document.getElementById('gateOverlay').style.display = 'flex';
+      return;
+    }
+    document.getElementById('gateOverlay').style.display = 'none';
+    document.getElementById('whoamiLabel').textContent = `${tester.name} (${tester.email})`;
+    initCheckboxes(tester.email);
+    setRole(localStorage.getItem('elevent_testing_plan_role') === 'org');
+  }
+
+  boot();
+</script>
+</body>
+</html>
