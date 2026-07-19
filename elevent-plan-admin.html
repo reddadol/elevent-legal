@@ -65,6 +65,21 @@
 
   footer { text-align:center; margin-top:30px; color:var(--text-faint); font-size:12px; }
 
+  .control-card {
+    background: linear-gradient(135deg, rgba(191,0,255,0.1), rgba(0,245,255,0.06));
+    border: 1px solid var(--card-border); border-radius: 18px; padding: 22px 26px;
+    margin-bottom: 24px; display:flex; align-items:center; justify-content:space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .control-card .status-text { font-size:14.5px; color: var(--text); }
+  .control-card .status-text .eyebrow { font-family:'Orbitron',sans-serif; font-size:11px; color:var(--cyan); letter-spacing:1.5px; display:block; margin-bottom:6px; }
+  .start-btn {
+    background: linear-gradient(90deg, var(--purple), var(--cyan)); border:none; color:#08001A;
+    font-family:'Rajdhani',sans-serif; font-weight:800; font-size:14px; padding: 12px 22px;
+    border-radius: 10px; cursor:pointer; white-space:nowrap;
+  }
+  .start-btn:disabled { opacity:0.4; cursor:not-allowed; background: var(--card); color: var(--text-faint); }
+
   @media (max-width: 700px) {
     .wrap { padding: 28px 14px 60px; }
   }
@@ -75,6 +90,14 @@
   <div class="logo-row"><span class="logo-mark">✦</span><span class="logo-text">ELEVENT</span></div>
   <h1>Progreso de la Prueba Cerrada</h1>
   <p class="subtitle">Vista en vivo de los 14 días de testing. Cada celda muestra cuántas tareas completó ese tester ese día — verde = día completo, amarillo = parcial, gris = nada aún.</p>
+
+  <div class="control-card">
+    <div class="status-text">
+      <span class="eyebrow">CONTROL DE LA PRUEBA</span>
+      <span id="controlStatus">Cargando estado...</span>
+    </div>
+    <button class="start-btn" id="startBtn" onclick="startTesting()" disabled>Iniciar Prueba Cerrada</button>
+  </div>
 
   <div class="stats-row" id="statsRow"></div>
 
@@ -105,6 +128,53 @@
   const SUPABASE_KEY = 'sb_publishable_klgFTaQYqLevx9pkp2sUbA_53fmVe9g';
   const TABLE = 'testing_plan_progress';
   const TESTERS_TABLE = 'testing_plan_testers';
+  const CONFIG_TABLE = 'testing_plan_config';
+
+  async function loadControl() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${CONFIG_TABLE}?id=eq.1&select=started_at`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+      const rows = await res.json();
+      const startedAt = rows[0]?.started_at || null;
+      const btn = document.getElementById('startBtn');
+      const status = document.getElementById('controlStatus');
+      if (startedAt) {
+        const d = new Date(startedAt);
+        const dayNum = Math.max(1, Math.min(14, Math.floor((Date.now() - d.getTime()) / 86400000) + 1));
+        status.textContent = `Iniciada el ${d.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })} — hoy es el día ${dayNum} de 14.`;
+        btn.textContent = 'Ya está iniciada';
+        btn.disabled = true;
+      } else {
+        status.textContent = 'Todavía no se ha iniciado — los testers ven el plan bloqueado hasta que la actives.';
+        btn.textContent = 'Iniciar Prueba Cerrada';
+        btn.disabled = false;
+      }
+    } catch (e) {
+      document.getElementById('controlStatus').textContent = 'No se pudo cargar el estado.';
+    }
+  }
+
+  async function startTesting() {
+    if (!confirm('¿Iniciar la Prueba Cerrada ahora? El día 1 queda desbloqueado para todos los testers de inmediato, y los demás días se van abriendo automáticamente uno por día. No se puede deshacer.')) return;
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true;
+    btn.textContent = 'Iniciando...';
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/${CONFIG_TABLE}?id=eq.1`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json', Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ started_at: new Date().toISOString() }),
+      });
+      await loadControl();
+    } catch (e) {
+      alert('No se pudo iniciar — revisa tu conexión e intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = 'Iniciar Prueba Cerrada';
+    }
+  }
 
   // Total de tareas por día (debe calzar con elevent-plan-testing-14dias.html)
   const DAY_TOTALS = {1:5, 2:4, 3:5, 4:4, 5:4, 6:3, 7:3, 8:4, 9:4, 10:3, 11:4, 12:2, 13:2, 14:3};
@@ -222,8 +292,10 @@
     return d.innerHTML;
   }
 
+  loadControl();
   loadData();
   setInterval(loadData, 30000);
+  setInterval(loadControl, 30000);
 </script>
 </body>
 </html>
