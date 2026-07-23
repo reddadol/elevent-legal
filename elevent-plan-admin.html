@@ -177,13 +177,15 @@
   }
 
   // Total de tareas por día (debe calzar con elevent-plan-testing-14dias.html)
-  const DAY_TOTALS = {1:5, 2:4, 3:5, 4:4, 5:4, 6:3, 7:3, 8:4, 9:4, 10:3, 11:4, 12:2, 13:2, 14:3};
+  // Actualizado 2026-07-23 tras agregar pruebas de QA continuo (bloqueo,
+  // notificaciones, mensajería, seguridad, onboarding, rol de organizador).
+  const DAY_TOTALS = {1:5, 2:4, 3:8, 4:7, 5:4, 6:3, 7:6, 8:7, 9:6, 10:3, 11:6, 12:2, 13:2, 14:3};
   const DAYS = Object.keys(DAY_TOTALS).map(Number).sort((a,b)=>a-b);
 
   // IDs exactos de tareas solo-organizador — si alguien cambia de rol a mitad
   // de camino, estas se excluyen del conteo de un asistente (aunque haya
   // quedado marcada de cuando era organizador) para no inflar su progreso.
-  const ORG_ONLY_IDS = new Set(['d1-5','d3-5','d4-4','d5-4','d6-3','d8-4','d9-4','d11-3','d11-4']);
+  const ORG_ONLY_IDS = new Set(['d1-5','d3-5','d3-6','d4-4','d5-4','d6-3','d8-4','d8-5','d9-4','d11-3','d11-4']);
 
   function dayTotalForRole(d, role) {
     return role === 'organizador' ? DAY_TOTALS[d] : DAY_TOTALS[d] - countOrgOnlyInDay(d);
