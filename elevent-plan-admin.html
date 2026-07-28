@@ -89,7 +89,7 @@
 <div class="wrap">
   <div class="logo-row"><span class="logo-mark">✦</span><span class="logo-text">ELEVENT</span></div>
   <h1>Progreso de la Prueba Cerrada</h1>
-  <p class="subtitle">Vista en vivo de los 14 días de testing. Cada celda muestra cuántas tareas completó ese tester ese día — verde = día completo, amarillo = parcial, gris = nada aún.</p>
+  <p class="subtitle">Vista en vivo de los 18 días de testing. Cada celda muestra cuántas tareas completó ese tester ese día — verde = día completo, amarillo = parcial, gris = nada aún.</p>
 
   <div class="control-card">
     <div class="status-text">
@@ -117,7 +117,7 @@
 
   <div class="empty-state" id="emptyState" style="display:none">
     <div class="big">Todavía no hay actividad registrada.</div>
-    <div>Apenas un tester marque su primera tarea en el plan de 14 días, va a aparecer acá.</div>
+    <div>Apenas un tester marque su primera tarea en el plan de 18 días, va a aparecer acá.</div>
   </div>
 
   <footer>Elevent — Panel interno, no compartir el link públicamente · Auto-actualiza cada 30s</footer>
@@ -140,8 +140,8 @@
       const status = document.getElementById('controlStatus');
       if (startedAt) {
         const d = new Date(startedAt);
-        const dayNum = Math.max(1, Math.min(14, Math.floor((Date.now() - d.getTime()) / 86400000) + 1));
-        status.textContent = `Iniciada el ${d.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })} — hoy es el día ${dayNum} de 14.`;
+        const dayNum = Math.max(1, Math.min(18, Math.floor((Date.now() - d.getTime()) / 86400000) + 1));
+        status.textContent = `Iniciada el ${d.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })} — hoy es el día ${dayNum} de 18.`;
         btn.textContent = 'Ya está iniciada';
         btn.disabled = true;
       } else {
@@ -180,15 +180,15 @@
   // Actualizado 2026-07-23: las pruebas nuevas de QA continuo se movieron del
   // día 3 al día 4 en adelante — algunos testers ya habían completado el día 3
   // y era más probable que revisaran el día en curso.
-  // Actualizado 2026-07-25: +4 tareas en día 11 (perfil Momentos, hora/redes
-  // de evento, Explorar eventos nuevos, contador de caracteres en Lugar).
-  const DAY_TOTALS = {1:5, 2:4, 3:5, 4:10, 5:4, 6:3, 7:7, 8:7, 9:6, 10:3, 11:17, 12:2, 13:2, 14:3};
+  // Actualizado 2026-07-28: plan extendido de 14 a 18 días (días 15-18
+  // nuevos), +2 en día 11, +3 en día 12, +3 en día 13, +2 en día 14.
+  const DAY_TOTALS = {1:5, 2:4, 3:5, 4:10, 5:4, 6:3, 7:7, 8:7, 9:6, 10:3, 11:19, 12:5, 13:5, 14:5, 15:4, 16:5, 17:4, 18:3};
   const DAYS = Object.keys(DAY_TOTALS).map(Number).sort((a,b)=>a-b);
 
   // IDs exactos de tareas solo-organizador — si alguien cambia de rol a mitad
   // de camino, estas se excluyen del conteo de un asistente (aunque haya
   // quedado marcada de cuando era organizador) para no inflar su progreso.
-  const ORG_ONLY_IDS = new Set(['d1-5','d3-5','d4-4','d4-10','d5-4','d6-3','d8-4','d8-5','d9-4','d11-3','d11-4','d11-8','d11-12','d11-17']);
+  const ORG_ONLY_IDS = new Set(['d1-5','d3-5','d4-4','d4-10','d5-4','d6-3','d8-4','d8-5','d9-4','d11-3','d11-4','d11-8','d11-12','d11-17','d13-3','d13-5','d14-4','d14-5','d15-1','d15-2','d17-1','d17-2','d17-3']);
 
   function dayTotalForRole(d, role) {
     return role === 'organizador' ? DAY_TOTALS[d] : DAY_TOTALS[d] - countOrgOnlyInDay(d);
