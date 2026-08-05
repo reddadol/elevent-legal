@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cl.panoram.app",
+      "sha256_cert_fingerprints": [
+        "7C:94:A9:21:CA:50:7D:27:98:9D:F5:2F:4E:9C:A4:5A:29:FD:C4:96:B9:28:8C:BF:CC:42:AC:B0:68:50:65:6C"
+      ]
+    }
+  }
+]
