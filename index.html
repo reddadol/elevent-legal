@@ -206,25 +206,21 @@
   .step p{color:var(--text-dim); font-size:15px; max-width:520px;}
 
   /* VIDEO */
+  .video-stage{display:flex; justify-content:center;}
   .video-frame{
-    position:relative; aspect-ratio:16/9; border-radius:18px; overflow:hidden;
+    position:relative; width:100%; max-width:380px; aspect-ratio:9/16; border-radius:18px; overflow:hidden;
     background:var(--surface); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 30px 70px -30px rgba(0,0,0,0.6);
   }
   .video-frame::before{
     content:'';
-    position:absolute; inset:0;
+    position:absolute; inset:0; pointer-events:none; z-index:0;
     background:radial-gradient(ellipse 500px 300px at 50% 40%, rgba(0,229,216,0.14), transparent 70%);
   }
-  .play-btn{
-    position:relative; z-index:2;
-    width:74px; height:74px; border-radius:50%;
-    background:linear-gradient(90deg, var(--cyan), var(--magenta));
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 14px rgba(0,229,216,0.06);
+  .video-frame iframe{
+    position:relative; z-index:1;
+    width:100%; height:100%; border:0; display:block;
   }
-  .play-btn svg{margin-left:4px;}
-  .video-caption{position:relative; z-index:2; margin-top:120px; text-align:center; color:var(--text-dim); font-size:13px;}
 
   /* CTA */
   .cta{
@@ -406,11 +402,16 @@
       <h2>Míralo funcionando en 90 segundos</h2>
       <p>Un recorrido corto por el flujo de creación de evento, el editor de contenido y la página de Momentos.</p>
     </div>
-    <div class="video-frame">
-      <div class="play-btn">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 4L20 12L6 20V4Z" fill="#0B0614"/></svg>
+    <div class="video-stage">
+      <div class="video-frame">
+        <iframe
+          src="https://www.youtube.com/embed/M-ohLkgCnew"
+          title="Elevent — Demo para organizadores"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
       </div>
-      <div class="video-caption">Reemplazar este bloque con el embed del video (YouTube no listado o Loom)</div>
     </div>
   </div>
 </section>
@@ -421,8 +422,8 @@
       <h2>Sé uno de los organizadores fundadores</h2>
       <p>Estamos invitando a un primer grupo de organizadores a publicar sus eventos en Elevent antes del lanzamiento público. Gratis durante esta etapa.</p>
       <div class="cta-ctas">
-        <a href="mailto:hola@elevent.cl?subject=Quiero%20ser%20organizador%20fundador" class="btn btn-primary">Escribir a hola@elevent.cl</a>
-        <a href="#demo" class="btn btn-ghost">Ver la demo primero</a>
+        <a href="https://wa.me/56930388883?text=Hola%2C%20quiero%20ser%20organizador%20fundador%20en%20Elevent" class="btn btn-primary" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+        <a href="mailto:hola@elevent.cl?subject=Quiero%20ser%20organizador%20fundador" class="btn btn-ghost">Escribir a hola@elevent.cl</a>
       </div>
       <p class="cta-note">Cupos limitados para el grupo fundador de lanzamiento.</p>
     </div>
@@ -434,6 +435,7 @@
     <div class="logo" style="font-size:16px;">ELEVENT</div>
     <p>Chile · La app de comunidades apasionadas — anime, gaming, cosplay y más</p>
     <div class="footer-links">
+      <a href="https://wa.me/56930388883" target="_blank" rel="noopener">WhatsApp</a>
       <a href="mailto:hola@elevent.cl">hola@elevent.cl</a>
       <a href="/panoram-privacy.html">Privacidad</a>
       <a href="/panoram-terms.html">Términos</a>
